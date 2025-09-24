@@ -7,9 +7,19 @@ namespace PersonalFinanceTracker.Data;
 public class FinanceDbContext : DbContext
 {
     public DbSet<Category> Categories { get; set; } = null!;
-    
+    public DbSet<Transaction> Transactions { get; set; } = null!;
+
     public FinanceDbContext(DbContextOptions options) : base(options)
     {
         
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Transaction>()
+            .HasOne(t => t.Category)
+            .WithMany()
+            .HasForeignKey(x => x.CategoryId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
