@@ -51,7 +51,7 @@ public class CategoryService
         } 
     }
     
-    public async Task<bool> IsCategoryAlreadyExist(string name, int? excludeId = null)
+    public async Task<bool> IsCategoryExist(string name, int? excludeId = null)
     {
         var query = _dbContext.Categories.AsQueryable();
         if (excludeId is not null)
@@ -60,8 +60,13 @@ public class CategoryService
         return await query.AnyAsync(c => c.Name == name);
     }
     
-    public async Task<bool> IsCategoryAlreadyExist(int id)
+    public async Task<bool> IsCategoryExist(int id)
     {
         return await _dbContext.Categories.AnyAsync(c => c.Id == id);
+    }
+
+    public async Task<bool> HasTransactions(int id)
+    {
+        return await _dbContext.Transactions.AnyAsync(t => t.CategoryId == id);
     }
 }

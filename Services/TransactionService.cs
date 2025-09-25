@@ -60,4 +60,9 @@ public class TransactionService
             await _dbContext.SaveChangesAsync();
         }
     }
+
+    public async Task<bool> IsTransactionExist(int id)
+    {
+        return await _dbContext.Transactions.AnyAsync(t => t.Id == id);
+    }
 }

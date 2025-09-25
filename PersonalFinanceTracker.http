@@ -4,3 +4,5 @@ GET {{PersonalFinanceTracker_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+DELETE {{PersonalFinanceTracker_HostAddress}}/api/categories/6/
