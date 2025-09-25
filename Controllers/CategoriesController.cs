@@ -38,7 +38,7 @@ public class CategoriesController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Category>> CreateCategory(Category category)
     {
-        if (await _categoryService.IsCategoryExist(category.Name) || await _categoryService.IsCategoryExist(category.Id))
+        if (await _categoryService.IsCategoryAlreadyExist(category.Name) || await _categoryService.IsCategoryAlreadyExist(category.Id))
         {
             return Conflict("Category already exists");
         }
@@ -55,12 +55,12 @@ public class CategoriesController : ControllerBase
             return BadRequest();
         }
 
-        if (await _categoryService.IsCategoryExist(category.Name, excludeId: id))
+        if (await _categoryService.IsCategoryAlreadyExist(category.Name, excludeId: id))
         {
             return Conflict("Category already exists");
         }
 
-        if (!await _categoryService.IsCategoryExist(id))
+        if (!await _categoryService.IsCategoryAlreadyExist(id))
         {
             return NotFound("Category not found");
         }
@@ -73,7 +73,7 @@ public class CategoriesController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteCategory(int id)
     {
-        if (await _categoryService.IsCategoryExist(id) == false)
+        if (await _categoryService.IsCategoryAlreadyExist(id) == false)
         {
             return NotFound("Category not found");
         }

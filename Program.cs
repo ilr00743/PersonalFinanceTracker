@@ -8,6 +8,7 @@ builder.Services.AddDbContext<FinanceDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<CategoryService>();
+builder.Services.AddScoped<TransactionService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
