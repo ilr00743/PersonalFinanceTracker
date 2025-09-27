@@ -2,6 +2,7 @@
 
 namespace PersonalFinanceTracker.Attributes;
 
+[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
 public class NotAllowedFutureDateAttribute : ValidationAttribute
 {
     public override bool IsValid(object? value)

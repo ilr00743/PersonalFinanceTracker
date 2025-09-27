@@ -12,6 +12,8 @@ public class Category
     [MaxLength(200)]
     public string? Description { get; set; }
     public CategoryType Type { get; set; }
+
+    public int UserId { get; set; }
 }
 
 public enum CategoryType
