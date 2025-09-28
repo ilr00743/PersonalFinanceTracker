@@ -27,20 +27,20 @@ namespace PersonalFinanceTracker.Migrations
                 nullable: false,
                 defaultValue: 0);
 
-            // migrationBuilder.CreateTable(
-            //     name: "Users",
-            //     columns: table => new
-            //     {
-            //         Id = table.Column<int>(type: "INTEGER", nullable: false)
-            //             .Annotation("Sqlite:Autoincrement", true),
-            //         Email = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-            //         PasswordHash = table.Column<string>(type: "TEXT", nullable: false),
-            //         CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
-            //     },
-            //     constraints: table =>
-            //     {
-            //         table.PrimaryKey("PK_Users", x => x.Id);
-            //     });
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Email = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    PasswordHash = table.Column<string>(type: "TEXT", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Transactions_UserId",

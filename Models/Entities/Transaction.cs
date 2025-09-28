@@ -21,5 +21,5 @@ public class Transaction
     
     public Category Category { get; set; } = null!;
 
-    public int UserId { get; set; }
+    public required int UserId { get; set; }
 }

@@ -13,7 +13,7 @@ public class Category
     public string? Description { get; set; }
     public CategoryType Type { get; set; }
 
-    public int UserId { get; set; }
+    public required int UserId { get; set; }
 }
 
 public enum CategoryType

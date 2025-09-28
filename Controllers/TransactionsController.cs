@@ -52,6 +52,7 @@ public class TransactionsController : ControllerBase
             CategoryId = transactionDto.CategoryId,
             Description = transactionDto.Description,
             Date = transactionDto.Date,
+            UserId = transactionDto.UserId
         };
 
         await _transactionService.CreateTransaction(newTransaction);
@@ -78,7 +79,8 @@ public class TransactionsController : ControllerBase
             Amount = transactionDto.Amount,
             CategoryId = transactionDto.CategoryId,
             Description = transactionDto.Description,
-            Date = transactionDto.Date
+            Date = transactionDto.Date,
+            UserId = transactionDto.UserId
         };
         
         await _transactionService.UpdateTransaction(id, transactionToUpdate);
