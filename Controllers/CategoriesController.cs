@@ -39,7 +39,7 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Category>> CreateCategory(CreateCategoryDto dto)
+    public async Task<IActionResult> CreateCategory(CreateCategoryDto dto)
     {
         if (await _categoryService.IsCategoryExist(dto.Name))
         {

@@ -41,7 +41,7 @@ public class TransactionsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Transaction>> CreateTransaction(CreateTransactionDto transactionDto)
+    public async Task<IActionResult> CreateTransaction(CreateTransactionDto transactionDto)
     {
         if (!await _categoryService.IsCategoryExist(transactionDto.CategoryId))
         {
