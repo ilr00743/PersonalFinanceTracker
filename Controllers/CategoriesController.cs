@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PersonalFinanceTracker.Models.DTO;
 using PersonalFinanceTracker.Models.Entities;
 using PersonalFinanceTracker.Services;
 
 namespace PersonalFinanceTracker.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/categories")]
 public class CategoriesController : ControllerBase
@@ -37,38 +39,33 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Category>> CreateCategory(Category category)
+    public async Task<ActionResult<Category>> CreateCategory(CreateCategoryDto dto)
     {
-        if (await _categoryService.IsCategoryExist(category.Name) || await _categoryService.IsCategoryExist(category.Id))
+        if (await _categoryService.IsCategoryExist(dto.Name))
         {
             return Conflict("Category already exists");
         }
         
-        await _categoryService.CreateCategory(category);
-        return CreatedAtAction(nameof(GetCategory), new {id = category.Id}, category);
+        await _categoryService.CreateCategory(dto);
+        return Created("", dto);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateCategory(int id, Category category)
+    public async Task<IActionResult> UpdateCategory(int id, UpdateCategoryDto dto)
     {
-        if (id != category.Id)
-        {
-            return BadRequest();
-        }
-
-        if (await _categoryService.IsCategoryExist(category.Name, excludeId: id))
+        if (await _categoryService.IsCategoryExist(dto.Name, excludeId: id))
         {
             return Conflict("Category already exists");
         }
-
+        
         if (!await _categoryService.IsCategoryExist(id))
         {
             return NotFound("Category not found");
         }
-        
-        await _categoryService.UpdateCategory(id, category);
 
-        return Ok(category);
+        await _categoryService.UpdateCategory(id, dto);
+
+        return Ok(dto);
     }
     
     [HttpDelete("{id}")]

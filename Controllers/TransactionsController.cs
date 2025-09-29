@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PersonalFinanceTracker.Models.DTO;
 using PersonalFinanceTracker.Models.Entities;
 using PersonalFinanceTracker.Services;
 
 namespace PersonalFinanceTracker.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/transactions")]
 public class TransactionsController : ControllerBase
@@ -46,18 +48,9 @@ public class TransactionsController : ControllerBase
             return BadRequest("Category not found");
         }
 
-        var newTransaction = new Transaction
-        {
-            Amount = transactionDto.Amount,
-            CategoryId = transactionDto.CategoryId,
-            Description = transactionDto.Description,
-            Date = transactionDto.Date,
-            UserId = transactionDto.UserId
-        };
-
-        await _transactionService.CreateTransaction(newTransaction);
+        await _transactionService.CreateTransaction(transactionDto);
         
-        return CreatedAtAction(nameof(GetTransaction), new { id = newTransaction.Id }, newTransaction);
+        return Created("", transactionDto);
     }
 
     [HttpPut("{id}")]
@@ -72,18 +65,8 @@ public class TransactionsController : ControllerBase
         {
             return BadRequest("Category not found");
         }
-
-        var transactionToUpdate = new Transaction
-        {
-            Id = id,
-            Amount = transactionDto.Amount,
-            CategoryId = transactionDto.CategoryId,
-            Description = transactionDto.Description,
-            Date = transactionDto.Date,
-            UserId = transactionDto.UserId
-        };
         
-        await _transactionService.UpdateTransaction(id, transactionToUpdate);
+        await _transactionService.UpdateTransaction(id, transactionDto);
 
         return NoContent();
     }
