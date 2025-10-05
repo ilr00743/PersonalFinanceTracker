@@ -10,6 +10,9 @@ using PersonalFinanceTracker.Services.JWT;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
 builder.Services.AddDbContext<FinanceDbContext>(options => 
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") 
                       ?? throw new NullReferenceException("Connection string not found")));

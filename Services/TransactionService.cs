@@ -9,11 +9,13 @@ public class TransactionService
 {
     private readonly FinanceDbContext _dbContext;
     private readonly IUserService _userService;
+    private readonly ILogger<TransactionService> _logger;
 
-    public TransactionService(FinanceDbContext dbContext, IUserService userService)
+    public TransactionService(FinanceDbContext dbContext, IUserService userService, ILogger<TransactionService> logger)
     {
         _dbContext = dbContext;
         _userService = userService;
+        _logger = logger;
     }
 
     public async Task<ICollection<Transaction>> GetTransactions()
@@ -33,6 +35,8 @@ public class TransactionService
 
     public async Task CreateTransaction(CreateTransactionDto transactionDto)
     {
+        _logger.LogInformation("Creating transaction for user {userId}", _userService.GetCurrentUserId());
+        
         var newTransaction = new Transaction
         {
             Amount = transactionDto.Amount,
@@ -44,14 +48,19 @@ public class TransactionService
         
         await _dbContext.Transactions.AddAsync(newTransaction);
         await _dbContext.SaveChangesAsync();
+        
+        _logger.LogInformation("Transaction created for user {userId}", newTransaction.UserId);
     }
 
     public async Task UpdateTransaction(int id, UpdateTransactionDto transactionDto)
     {
+        _logger.LogInformation("Updating transaction {id} for user {userId}", id, _userService.GetCurrentUserId());
+        
         var transactionToUpdate = await GetTransaction(id);
 
         if (transactionToUpdate is null)
         {
+            _logger.LogWarning("Transaction {id} not found for user {userId}", id, _userService.GetCurrentUserId());
             return;
         }
 
@@ -61,16 +70,24 @@ public class TransactionService
         transactionToUpdate.Description = transactionDto.Description;
 
         await _dbContext.SaveChangesAsync();
+        _logger.LogInformation("Transaction {id} updated for user {userId}", id, _userService.GetCurrentUserId());
     }
 
     public async Task DeleteTransaction(int id)
     {
+        _logger.LogInformation("Deleting transaction {id} for user {userId}", id, _userService.GetCurrentUserId());
+        
         var transactionToDelete = await GetTransaction(id);
 
         if (transactionToDelete is not null)
         {
             _dbContext.Transactions.Remove(transactionToDelete);
             await _dbContext.SaveChangesAsync();
+            _logger.LogInformation("Transaction {id} deleted for user {userId}", id, _userService.GetCurrentUserId());
+        }
+        else
+        {
+            _logger.LogWarning("Transaction {id} not found for user {userId}", id, _userService.GetCurrentUserId());
         }
     }
 

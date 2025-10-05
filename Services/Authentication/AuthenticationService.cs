@@ -8,17 +8,23 @@ namespace PersonalFinanceTracker.Services.Authentication;
 public class AuthenticationService : IAuthenticationService
 {
     private const int WorkFactor = 12;
+    
     private readonly FinanceDbContext _dbContext;
-
-    public AuthenticationService(FinanceDbContext dbContext)
+    private readonly ILogger<AuthenticationService> _logger;
+    
+    public AuthenticationService(FinanceDbContext dbContext, ILogger<AuthenticationService> logger)
     {
         _dbContext = dbContext;
+        _logger = logger;
     }
     
     public async Task<User> RegisterUserAsync(RegisterDto dto)
     {
+        _logger.LogInformation("Attempting to register user with email {email}", dto.Email);
+        
         if (await _dbContext.Users.AnyAsync(u => u.Email == dto.Email))
         {
+            _logger.LogWarning("User with this email already exists");
             throw new InvalidOperationException("User with this email already exists");
         }
 
@@ -34,19 +40,33 @@ public class AuthenticationService : IAuthenticationService
         await _dbContext.Users.AddAsync(newUser);
         await _dbContext.SaveChangesAsync();
         
+        _logger.LogInformation("User with email {email} registered", newUser.Email);
+        
         return newUser;
     }
 
     public async Task<User?> ValidateUserCredentialsAsync(LoginDto dto)
     {
+        _logger.LogInformation("Validating user credentials with email {email}", dto.Email);
+        
         var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
 
         if (user is null)
         {
+            _logger.LogWarning("User not found");
+            return null;
+        }
+
+        if (!IsPasswordVerified(dto.Password, user.PasswordHash))
+        {
+            _logger.LogWarning("Invalid password for user");
             return null;
         }
         
-        return IsPasswordVerified(dto.Password, user.PasswordHash) ? user : null;
+        _logger.LogInformation("User {UserId} credentials are valid", user.Id);
+
+        return user;
+        
     }
 
     public string GetPasswordHash(string password)

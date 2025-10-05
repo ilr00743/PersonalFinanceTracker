@@ -9,11 +9,13 @@ public class CategoryService
 {
     private readonly FinanceDbContext _dbContext;
     private readonly IUserService _userService;
+    private readonly ILogger<CategoryService> _logger;
     
-    public CategoryService(FinanceDbContext dbContext, IUserService userService)
+    public CategoryService(FinanceDbContext dbContext, IUserService userService, ILogger<CategoryService> logger)
     {
         _dbContext = dbContext;
         _userService = userService;
+        _logger = logger;
     }
 
     public async Task<List<Category>?> GetCategories()
@@ -30,6 +32,8 @@ public class CategoryService
 
     public async Task CreateCategory(CreateCategoryDto dto)
     {
+        _logger.LogInformation("Creating category {name} for user {userId}", dto.Name, _userService.GetCurrentUserId());
+        
         var newCategory = new Category
         {
             Name = dto.Name,
@@ -40,28 +44,48 @@ public class CategoryService
         
         await _dbContext.Categories.AddAsync(newCategory);
         await _dbContext.SaveChangesAsync();
+        
+        _logger.LogInformation("Category {name} created for user {id}", newCategory.Name, newCategory.UserId);
     }
 
     public async Task UpdateCategory(int id, UpdateCategoryDto dto)
     {
-        var categoryToUpdate = await GetCategory(id) ?? throw new NullReferenceException("Category not found");
+        _logger.LogInformation("Updating category {id} for user {userId}", id, _userService.GetCurrentUserId());
+        
+        var categoryToUpdate = await GetCategory(id);
+        
+        if(categoryToUpdate is null)
+        {
+            _logger.LogWarning("Category {id} not found for user {userId}", id, _userService.GetCurrentUserId());
+            return;
+        }
         
         categoryToUpdate.Name = dto.Name;
         categoryToUpdate.Description = dto.Description;
         categoryToUpdate.Type = dto.Type;
         
         await _dbContext.SaveChangesAsync();
+        
+        _logger.LogInformation("Category {id} updated for user {userId}", id, _userService.GetCurrentUserId());
     }
     
     public async Task DeleteCategory(int id)
     {
+        _logger.LogInformation("Deleting category {id} for user {userId}", id, _userService.GetCurrentUserId());
+        
         var categoryToDelete = await GetCategory(id);
         
         if (categoryToDelete is not null)
         {
             _dbContext.Categories.Remove(categoryToDelete);
             await _dbContext.SaveChangesAsync();
-        } 
+            
+            _logger.LogInformation("Category {id} deleted for user {userId}", id, _userService.GetCurrentUserId());
+        }
+        else
+        {
+            _logger.LogWarning("Category {id} not found for user {userId}", id, _userService.GetCurrentUserId());
+        }
     }
     
     public async Task<bool> IsCategoryExist(string name, int? excludeId = null)
