@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PersonalFinanceTracker.Data;
+using PersonalFinanceTracker.Extensions;
 using PersonalFinanceTracker.Services;
 using PersonalFinanceTracker.Services.Authentication;
 using PersonalFinanceTracker.Services.JWT;
@@ -74,6 +75,8 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
+app.UseExceptionHandlerExtended();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -87,5 +90,24 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.MapGet("/", () => "Hello World!");
+
+#region TestEndpoints
+
+app.MapGet("/test-error", () =>
+{
+    throw new InvalidOperationException("Test error message");
+});
+
+app.MapGet("/test-unauthorized", () =>
+{
+    throw new UnauthorizedAccessException("Test unauthorized message");
+});
+
+app.Map("/test-agrument", () =>
+{
+    throw new ArgumentException("Test argument message");
+});
+
+#endregion
 
 app.Run();

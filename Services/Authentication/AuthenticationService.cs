@@ -54,11 +54,12 @@ public class AuthenticationService : IAuthenticationService
         if (user is null)
         {
             _logger.LogWarning("User not found");
-            return null;
+            throw new InvalidOperationException("User not found");
         }
 
         if (!IsPasswordVerified(dto.Password, user.PasswordHash))
         {
+            
             _logger.LogWarning("Invalid password for user");
             return null;
         }
