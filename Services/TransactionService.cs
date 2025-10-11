@@ -1,7 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Linq.Dynamic.Core;
+using Microsoft.EntityFrameworkCore;
 using PersonalFinanceTracker.Data;
 using PersonalFinanceTracker.Models.DTO;
 using PersonalFinanceTracker.Models.Entities;
+using PersonalFinanceTracker.Models.QueryParameters;
 
 namespace PersonalFinanceTracker.Services;
 
@@ -18,12 +20,50 @@ public class TransactionService
         _logger = logger;
     }
 
-    public async Task<ICollection<Transaction>> GetTransactions()
+    public async Task<ICollection<Transaction>> GetTransactions(TransactionFilterDto? filterDto = null, SortingQueryParameters? sortingParams = null)
     {
-        return await _dbContext.Transactions
+        var query = _dbContext.Transactions.AsQueryable();
+
+        if (filterDto is not null)
+        {
+            if (filterDto.CategoryId.HasValue)
+            {
+                query = query.Where(t => t.CategoryId == filterDto.CategoryId);
+            }
+
+            if (filterDto.MinAmount.HasValue)
+            {
+                query = query.Where(t => t.Amount >= filterDto.MinAmount);
+            }
+        
+            if (filterDto.MaxAmount.HasValue)
+            {
+                query = query.Where(t => t.Amount <= filterDto.MaxAmount);
+            }
+
+            if (filterDto.From.HasValue)
+            {
+                query = query.Where(t => t.Date >= filterDto.From);
+            }
+        
+            if (filterDto.To.HasValue)
+            {
+                query = query.Where(t => t.Date <= filterDto.To);
+            }
+        }
+
+        if (!string.IsNullOrEmpty(sortingParams?.OrderBy))
+        {
+            var orderFlow = sortingParams.ShouldOrderAscending ? "asc" : "desc";
+
+            query = query.OrderBy($"{sortingParams.OrderBy} {orderFlow}");
+        }
+
+        return await query
             .Where(t => t.UserId == _userService.GetCurrentUserId())
             .Include(t => t.Category)
             .ToListAsync();
+
     }
     
     public async Task<Transaction?> GetTransaction(int id)

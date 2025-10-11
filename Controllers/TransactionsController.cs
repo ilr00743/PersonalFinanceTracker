@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PersonalFinanceTracker.Models.DTO;
-using PersonalFinanceTracker.Models.Entities;
+using PersonalFinanceTracker.Models.QueryParameters;
 using PersonalFinanceTracker.Services;
 
 namespace PersonalFinanceTracker.Controllers;
@@ -21,9 +21,9 @@ public class TransactionsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetTransactions()
+    public async Task<IActionResult> GetTransactions([FromQuery] TransactionFilterDto? dto, [FromQuery] SortingQueryParameters? sortingParams)
     {
-        var transactions = await _transactionService.GetTransactions();
+        var transactions = await _transactionService.GetTransactions(dto, sortingParams);
         return Ok(transactions);
     }
 
