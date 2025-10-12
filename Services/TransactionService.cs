@@ -1,5 +1,4 @@
-﻿using System.Linq.Dynamic.Core;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using PersonalFinanceTracker.Data;
 using PersonalFinanceTracker.Models.DTO;
 using PersonalFinanceTracker.Models.Entities;
@@ -24,40 +23,9 @@ public class TransactionService
     {
         var query = _dbContext.Transactions.AsQueryable();
 
-        if (filterDto is not null)
-        {
-            if (filterDto.CategoryId.HasValue)
-            {
-                query = query.Where(t => t.CategoryId == filterDto.CategoryId);
-            }
+        query = ApplyFilter(filterDto, query);
 
-            if (filterDto.MinAmount.HasValue)
-            {
-                query = query.Where(t => t.Amount >= filterDto.MinAmount);
-            }
-        
-            if (filterDto.MaxAmount.HasValue)
-            {
-                query = query.Where(t => t.Amount <= filterDto.MaxAmount);
-            }
-
-            if (filterDto.From.HasValue)
-            {
-                query = query.Where(t => t.Date >= filterDto.From);
-            }
-        
-            if (filterDto.To.HasValue)
-            {
-                query = query.Where(t => t.Date <= filterDto.To);
-            }
-        }
-
-        if (!string.IsNullOrEmpty(sortingParams?.OrderBy))
-        {
-            var orderFlow = sortingParams.ShouldOrderAscending ? "asc" : "desc";
-
-            query = query.OrderBy($"{sortingParams.OrderBy} {orderFlow}");
-        }
+        query = ApplySorting(sortingParams, query);
 
         return await query
             .Where(t => t.UserId == _userService.GetCurrentUserId())
@@ -65,7 +33,7 @@ public class TransactionService
             .ToListAsync();
 
     }
-    
+
     public async Task<Transaction?> GetTransaction(int id)
     {
         return await _dbContext.Transactions
@@ -134,5 +102,68 @@ public class TransactionService
     public async Task<bool> IsTransactionExist(int id)
     {
         return await _dbContext.Transactions.AnyAsync(t => t.Id == id && t.UserId == _userService.GetCurrentUserId());
+    }
+    
+    private static IQueryable<Transaction> ApplySorting(SortingQueryParameters? sortingParams, IQueryable<Transaction> query)
+    {
+        if (string.IsNullOrEmpty(sortingParams?.OrderBy))
+        {
+            return query.OrderBy(t => t.Id);
+        }
+
+        query = sortingParams.OrderBy.ToLower() switch
+        {
+            "id" => sortingParams.ShouldOrderAscending 
+                ? query.OrderBy(t => t.Id) 
+                : query.OrderByDescending(t => t.Id),
+            
+            "date" => sortingParams.ShouldOrderAscending 
+                ? query.OrderBy(t => t.Date) 
+                : query.OrderByDescending(t => t.Date),
+            
+            "amount" => sortingParams.ShouldOrderAscending 
+                ? query.OrderBy(t => (double)t.Amount) 
+                : query.OrderByDescending(t => (double)t.Amount),
+            
+            "category" => sortingParams.ShouldOrderAscending 
+                ? query.OrderBy(t => t.CategoryId) 
+                : query.OrderByDescending(t => t.CategoryId),
+            
+            _ => query.OrderBy(t => t.Id)
+        };
+
+        return query;
+    }
+
+    private IQueryable<Transaction> ApplyFilter(TransactionFilterDto? filterDto, IQueryable<Transaction> query)
+    {
+        if (filterDto is null) return query;
+        
+        if (filterDto.CategoryId.HasValue)
+        {
+            query = query.Where(t => t.CategoryId == filterDto.CategoryId);
+        }
+
+        if (filterDto.MinAmount.HasValue)
+        {
+            query = query.Where(t => t.Amount >= filterDto.MinAmount);
+        }
+        
+        if (filterDto.MaxAmount.HasValue)
+        {
+            query = query.Where(t => t.Amount <= filterDto.MaxAmount);
+        }
+
+        if (filterDto.From.HasValue)
+        {
+            query = query.Where(t => t.Date >= filterDto.From);
+        }
+        
+        if (filterDto.To.HasValue)
+        {
+            query = query.Where(t => t.Date <= filterDto.To);
+        }
+
+        return query;
     }
 }
