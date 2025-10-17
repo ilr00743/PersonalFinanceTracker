@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PersonalFinanceTracker.Data;
+using PersonalFinanceTracker.Extensions;
 using PersonalFinanceTracker.Models.DTO;
 using PersonalFinanceTracker.Models.Entities;
 using PersonalFinanceTracker.Models.QueryParameters;
@@ -19,18 +20,17 @@ public class TransactionService
         _logger = logger;
     }
 
-    public async Task<ICollection<Transaction>> GetTransactions(TransactionFilterDto? filterDto = null, SortingQueryParameters? sortingParams = null)
+    public async Task<PagedList<Transaction>> GetTransactions(PaginationParameters paginationParameters, TransactionFilterParameters? filterDto = null, SortingQueryParameters? sortingParams = null)
     {
-        var query = _dbContext.Transactions.AsQueryable();
+        var query = _dbContext.Transactions
+            .Where(t => t.UserId == _userService.GetCurrentUserId())
+            .AsQueryable();
 
         query = ApplyFilter(filterDto, query);
 
         query = ApplySorting(sortingParams, query);
 
-        return await query
-            .Where(t => t.UserId == _userService.GetCurrentUserId())
-            .Include(t => t.Category)
-            .ToListAsync();
+        return await PagedList<Transaction>.ToPagedList(query, paginationParameters.PageNumber, paginationParameters.PageSize);
 
     }
 
@@ -135,7 +135,7 @@ public class TransactionService
         return query;
     }
 
-    private IQueryable<Transaction> ApplyFilter(TransactionFilterDto? filterDto, IQueryable<Transaction> query)
+    private IQueryable<Transaction> ApplyFilter(TransactionFilterParameters? filterDto, IQueryable<Transaction> query)
     {
         if (filterDto is null) return query;
         

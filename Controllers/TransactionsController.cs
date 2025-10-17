@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PersonalFinanceTracker.Models.DTO;
 using PersonalFinanceTracker.Models.QueryParameters;
@@ -13,17 +15,34 @@ public class TransactionsController : ControllerBase
 {
     private readonly TransactionService _transactionService;
     private readonly CategoryService _categoryService;
+    private readonly ILogger<TransactionsController> _logger;
 
-    public TransactionsController(TransactionService transactionService, CategoryService categoryService)
+    public TransactionsController(TransactionService transactionService, CategoryService categoryService, ILogger<TransactionsController> logger)
     {
         _transactionService = transactionService;
         _categoryService = categoryService;
+        _logger = logger;
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetTransactions([FromQuery] TransactionFilterDto? dto, [FromQuery] SortingQueryParameters? sortingParams)
+    public async Task<IActionResult> GetTransactions([FromQuery] PaginationParameters paginationParameters, [FromQuery] TransactionFilterParameters? filterParameters = null, [FromQuery] SortingQueryParameters? sortingParameters = null)
     {
-        var transactions = await _transactionService.GetTransactions(dto, sortingParams);
+        var transactions = await _transactionService.GetTransactions(paginationParameters, filterParameters, sortingParameters);
+
+        var metadata = new
+        {
+            transactions.ItemsAmountOnPage,
+            transactions.PageSize,
+            transactions.CurrentPage,
+            transactions.TotalPages,
+            transactions.HasNext,
+            transactions.HasPrevious
+        };
+        
+        Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metadata));
+        
+        _logger.LogInformation("Returned {TransactionsTotalCount} transactions from database.", transactions.ItemsAmountOnPage);
+        
         return Ok(transactions);
     }
 

@@ -1,6 +1,6 @@
 ﻿namespace PersonalFinanceTracker.Models.DTO;
 
-public class TransactionFilterDto
+public class TransactionFilterParameters
 {
     public DateTime? From { get; set; } = null;
     
