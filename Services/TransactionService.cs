@@ -24,6 +24,7 @@ public class TransactionService
     {
         var query = _dbContext.Transactions
             .Where(t => t.UserId == _userService.GetCurrentUserId())
+            .Include(t => t.Category)
             .AsQueryable();
 
         query = ApplyFilter(filterDto, query);
