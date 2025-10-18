@@ -31,7 +31,7 @@ public class TransactionService
 
         query = ApplySorting(sortingParams, query);
 
-        return await PagedList<Transaction>.ToPagedList(query, paginationParameters.PageNumber, paginationParameters.PageSize);
+        return await query.ToPagedList( paginationParameters.PageNumber, paginationParameters.PageSize);
 
     }
 
@@ -105,7 +105,7 @@ public class TransactionService
         return await _dbContext.Transactions.AnyAsync(t => t.Id == id && t.UserId == _userService.GetCurrentUserId());
     }
     
-    private static IQueryable<Transaction> ApplySorting(SortingQueryParameters? sortingParams, IQueryable<Transaction> query)
+    private IQueryable<Transaction> ApplySorting(SortingQueryParameters? sortingParams, IQueryable<Transaction> query)
     {
         if (string.IsNullOrEmpty(sortingParams?.OrderBy))
         {
