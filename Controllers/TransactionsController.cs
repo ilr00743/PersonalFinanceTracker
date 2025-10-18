@@ -31,9 +31,10 @@ public class TransactionsController : ControllerBase
 
         var metadata = new
         {
-            transactions.ItemsAmountOnPage,
-            transactions.PageSize,
             transactions.CurrentPage,
+            transactions.ItemsAmountOnCurrentPage,
+            transactions.PageSize,
+            transactions.TotalItemsAmount,
             transactions.TotalPages,
             transactions.HasNext,
             transactions.HasPrevious
@@ -41,7 +42,7 @@ public class TransactionsController : ControllerBase
         
         Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metadata));
         
-        _logger.LogInformation("Returned {TransactionsTotalCount} transactions from database.", transactions.ItemsAmountOnPage);
+        _logger.LogInformation("Returned {ItemsAmountOnPage} transactions from database.", transactions.ItemsAmountOnCurrentPage);
         
         return Ok(transactions);
     }
