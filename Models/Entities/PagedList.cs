@@ -21,12 +21,4 @@ public class PagedList<T> : List<T>
         
         AddRange(items);
     }
-
-    // public static async Task<PagedList<T>> ToPagedList(IQueryable<T> source, int pageNumber, int pageSize)
-    // {
-    //     var count = source.Count();
-    //     var items = source.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
-    //
-    //     return await Task.Run(() => new PagedList<T>(items, count, items.Count, pageNumber, pageSize));
-    // }
 }

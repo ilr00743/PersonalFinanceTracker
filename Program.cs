@@ -15,9 +15,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
-builder.Services.AddDbContext<FinanceDbContext>(options => 
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") 
-                      ?? throw new NullReferenceException("Connection string not found")));
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+                       ?? throw new NullReferenceException("Connection string not found");
+
+builder.Services.AddDbContext<FinanceDbContext>(options => options.UseSqlite(connectionString));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -43,6 +44,7 @@ builder.Services.AddScoped<TransactionService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<BudgetService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

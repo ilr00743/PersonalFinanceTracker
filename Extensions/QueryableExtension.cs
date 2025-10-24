@@ -3,7 +3,7 @@ using PersonalFinanceTracker.Models.Entities;
 
 namespace PersonalFinanceTracker.Extensions;
 
-public static class EnumerableExtension
+public static class QueryableExtension
 {
     public static async Task<PagedList<T>> ToPagedList<T>(this IQueryable<T> source, int pageNumber, int pageSize)
     {

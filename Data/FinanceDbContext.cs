@@ -9,6 +9,7 @@ public class FinanceDbContext : DbContext
     public DbSet<Category> Categories { get; set; } = null!;
     public DbSet<Transaction> Transactions { get; set; } = null!;
     public DbSet<User> Users { get; set; } = null!;
+    public DbSet<Budget> Budgets { get; set; } = null!;
 
     public FinanceDbContext(DbContextOptions options) : base(options)
     {
@@ -32,5 +33,17 @@ public class FinanceDbContext : DbContext
             .HasMany(u => u.Categories)
             .WithOne()
             .HasForeignKey(c => c.UserId);
+
+        modelBuilder.Entity<Budget>()
+            .HasOne(b => b.Category)
+            .WithMany()
+            .HasForeignKey(b => b.CategoryId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Budget>()
+            .HasOne<User>()
+            .WithMany()
+            .HasForeignKey(b => b.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
