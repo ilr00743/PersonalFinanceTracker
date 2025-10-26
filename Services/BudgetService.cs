@@ -57,48 +57,85 @@ public class BudgetService
     public async Task<IEnumerable<BudgetResponse>> GetBudgets()
     {
         var userId = _userService.GetCurrentUserId();
-        
+
         var budgets = await _dbContext.Budgets
             .Where(b => b.UserId == userId)
             .Include(budget => budget.Category)
             .ToListAsync();
 
-        var budgetsDto = await Task.WhenAll(budgets.Select(async (b) =>
+        var groupedTransactions = await _dbContext.Transactions
+            .Where(t => t.UserId == userId)
+            .GroupBy(t => new { t.CategoryId, t.Date.Month, t.Date.Year })
+            .Select(group => new
+            {
+                group.Key.CategoryId,
+                group.Key.Month,
+                group.Key.Year,
+                Spent = group.Sum(t => t.Amount)
+            })
+            .ToListAsync();
+
+        var spentLookup = groupedTransactions.ToDictionary(
+            s => (s.CategoryId, s.Month, s.Year),
+            s => s.Spent);
+        
+        var budgetsDto = budgets.Select(b =>
         {
-            var spent = await CalculateSpent(b.CategoryId, b.Month, b.Year);
+            var spent = spentLookup.TryGetValue((b.CategoryId, (int)b.Month, b.Year), out var amount) ? amount : 0;
 
             return new BudgetResponse
             {
                 Id = b.Id,
-
                 CategoryId = b.CategoryId,
                 CategoryName = b.Category.Name,
                 CategoryType = b.Category.Type,
                 CreatedAt = b.CreatedAt,
-
                 Limit = b.Limit,
-
                 Month = b.Month,
                 Year = b.Year,
-
                 Spent = spent,
                 Remaining = b.Limit - spent,
-                PercentageUsed = b.Limit > 0 ? (spent / b.Limit) * 100 : 0,
+                PercentageUsed = spent > 0 ? spent / b.Limit * 100 : 0,
                 IsOverBudget = spent > b.Limit
             };
-        }));
+        }).ToList();
 
         return budgetsDto;
     }
 
-    public async Task CreateBudget(CreateBudgetDto budget)
+    public async Task CreateBudget(CreateBudgetDto dto)
     {
-        throw new NotImplementedException();
+        var newBudget = new Budget
+        {
+            CategoryId = dto.CategoryId,
+            Limit = dto.Limit,
+            Month = dto.Month,
+            Year = dto.Year,
+            CreatedAt = DateTime.UtcNow,
+            UserId = _userService.GetCurrentUserId()
+        };
+
+        await _dbContext.Budgets.AddAsync(newBudget);
+        await _dbContext.SaveChangesAsync();
     }
 
-    public async Task UpdateBudget(int id, UpdateBudgetDto updatedBudget)
+    public async Task UpdateBudget(int id, UpdateBudgetDto dto)
     {
-        throw new NotImplementedException();
+        var budgetToUpdate = await _dbContext.Budgets.FirstOrDefaultAsync(b => 
+            b.Id == id && b.UserId == _userService.GetCurrentUserId());
+
+        if (budgetToUpdate is null)
+        {
+            _logger.LogWarning("The budget {id} not found for user {userId}", id, _userService.GetCurrentUserId());
+            return;
+        }
+
+        budgetToUpdate.CategoryId = dto.CategoryId;
+        budgetToUpdate.Limit = dto.Limit;
+        budgetToUpdate.Month = dto.Month;
+        budgetToUpdate.Year = dto.Year;
+
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task DeleteBudget(int id)

@@ -18,7 +18,7 @@ public class Budget
     [Range(2025, 2100)]
     public int Year { get; set; }
 
-    public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; init; }
     
     public required int UserId { get; set; }
 }
