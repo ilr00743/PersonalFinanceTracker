@@ -45,6 +45,7 @@ builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<BudgetService>();
+builder.Services.AddScoped<AnalyticsService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
