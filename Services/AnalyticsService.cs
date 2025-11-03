@@ -22,7 +22,9 @@ public class AnalyticsService
     public async Task<AnalyticsSummaryResponse> GetSummaryAsync(DateTime from, DateTime to)
     {
         var userTransactions = await _dbContext.Transactions
-            .Where(t => t.UserId == _userService.GetCurrentUserId())
+            .Where(t => t.UserId == _userService.GetCurrentUserId() 
+                        && t.Date >= from 
+                        && t.Date <= to)
             .Include(t => t.Category)
             .ToListAsync();
         
