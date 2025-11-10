@@ -58,7 +58,9 @@ public class AnalyticsService
     {
         List<PeriodAnalytics> list;
 
-        if (ShouldGroupByMonth(from, to))
+        var shouldGroupByMonth = ShouldGroupByMonth(from, to);
+        
+        if (shouldGroupByMonth)
         {
             var groupedTransactions = transactions.GroupBy(t => new { t.Date.Month, t.Date.Year });
 
@@ -96,6 +98,8 @@ public class AnalyticsService
                 };
             }).OrderBy(p => p.PeriodLabel).ToList();
         }
+        
+        FillTrendGaps(list, from, to, shouldGroupByMonth);
 
         return list;
     }

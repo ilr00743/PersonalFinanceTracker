@@ -85,7 +85,6 @@ var app = builder.Build();
 
 app.UseExceptionHandlerExtended();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
