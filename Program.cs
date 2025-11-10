@@ -99,6 +99,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
+app.MapGet("/health", () =>
+{
+    Console.WriteLine("[Health] Application is active.");
+    return Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow });
+});
 
 app.Run();
