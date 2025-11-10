@@ -99,25 +99,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-app.MapGet("/", () => "Hello World!");
-
-#region TestEndpoints
-
-app.MapGet("/test-error", () =>
-{
-    throw new InvalidOperationException("Test error message");
-});
-
-app.MapGet("/test-unauthorized", () =>
-{
-    throw new UnauthorizedAccessException("Test unauthorized message");
-});
-
-app.Map("/test-agrument", () =>
-{
-    throw new ArgumentException("Test argument message");
-});
-
-#endregion
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
 
 app.Run();
