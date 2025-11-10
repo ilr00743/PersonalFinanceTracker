@@ -33,9 +33,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 ? new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("jwt_key") ?? throw new InvalidOperationException("Jwt key not found.")))
                 : new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"]!)),
             ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+            ValidIssuer = "PersonalFinanceTracker",
             ValidateAudience = true,
-            ValidAudience = builder.Configuration["JwtSettings:Audience"],
+            ValidAudience = "PersonalFinanceTracker-Users",
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero
         };
