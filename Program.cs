@@ -30,8 +30,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = builder.Environment.IsDevelopment() 
-                ? new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("jwt_key") ?? throw new InvalidOperationException("Jwt key not found.")))
-                : new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"]!)),
+                ? new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"]!) ?? throw new InvalidOperationException("Jwt key not found."))
+                : new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("jwt_key")!)),
             ValidateIssuer = true,
             ValidIssuer = "PersonalFinanceTracker",
             ValidateAudience = true,
