@@ -23,7 +23,13 @@ if (builder.Environment.IsDevelopment())
 else
 {
     var connectionString = Environment.GetEnvironmentVariable("connection_string");
-    builder.Services.AddDbContext<FinanceDbContext>(options => options.UseNpgsql(connectionString));
+    builder.Services.AddDbContext<FinanceDbContext>(options => options.UseNpgsql(connectionString, npgsqlOptions =>
+    {
+        npgsqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(10),
+            errorCodesToAdd: null);
+    }));
 }
 
 
