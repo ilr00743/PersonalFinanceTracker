@@ -110,10 +110,29 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+if (app.Environment.IsProduction())
+{
+    using var scope = app.Services.CreateScope();
+    
+    var dbContext = scope.ServiceProvider.GetRequiredService<FinanceDbContext>();
+    try
+    {
+        app.Logger.LogInformation("Applying database migrations...");
+        dbContext.Database.Migrate();
+        app.Logger.LogInformation("Database migrations applied successfully");
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogError(ex, "An error occurred while migrating the database");
+        throw;
+    }
+}
+
 app.UseHttpsRedirection();
-app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseCors();
+
 app.MapControllers();
 
 app.MapGet("/health", () =>
