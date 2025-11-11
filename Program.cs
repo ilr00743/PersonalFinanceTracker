@@ -15,11 +15,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
-var connectionString = builder.Environment.IsDevelopment()
-    ? builder.Configuration.GetConnectionString("DefaultConnection")
-    : Environment.GetEnvironmentVariable("connection_string");
+if (builder.Environment.IsDevelopment())
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    builder.Services.AddDbContext<FinanceDbContext>(options => options.UseSqlite(connectionString));
+}
+else
+{
+    var connectionString = Environment.GetEnvironmentVariable("connection_string");
+    builder.Services.AddDbContext<FinanceDbContext>(options => options.UseNpgsql(connectionString));
+}
 
-builder.Services.AddDbContext<FinanceDbContext>(options => options.UseSqlite(connectionString));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -29,8 +35,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = builder.Environment.IsDevelopment() 
-                ? new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"]!) ?? throw new InvalidOperationException("Jwt key not found."))
+            IssuerSigningKey = builder.Environment.IsDevelopment()
+                ? new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"]!))
                 : new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("jwt_key")!)),
             ValidateIssuer = true,
             ValidIssuer = "PersonalFinanceTracker",
@@ -50,12 +56,22 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<BudgetService>();
 builder.Services.AddScoped<AnalyticsService>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "Personal Finance Tracker API", Version = "v1" });
-    
+
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -67,7 +83,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 
     var requirement = new OpenApiSecurityRequirement();
-    
+
     requirement.Add(new OpenApiSecurityScheme
     {
         Reference = new OpenApiReference
@@ -76,7 +92,7 @@ builder.Services.AddSwaggerGen(options =>
             Id = "Bearer"
         }
     }, new string[] { });
-    
+
     options.AddSecurityRequirement(requirement);
 
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -91,10 +107,11 @@ app.UseExceptionHandlerExtended();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(); 
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
