@@ -45,7 +45,7 @@ public class JwtService : IJwtService
 
     public DateTime GetTokenExpiration()
     {
-        var expirationHours = _configuration.GetSection("JwtSettings:ExpirationHours").Get<int>();
+        var expirationHours = 24;
         return DateTime.UtcNow.AddHours(expirationHours);
     }
 }
