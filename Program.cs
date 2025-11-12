@@ -15,14 +15,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
+var connectionString = Environment.GetEnvironmentVariable("connection_string");
+
 if (builder.Environment.IsDevelopment())
 {
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     builder.Services.AddDbContext<FinanceDbContext>(options => options.UseSqlite(connectionString));
 }
 else
 {
-    var connectionString = Environment.GetEnvironmentVariable("connection_string");
+    
     builder.Services.AddDbContext<FinanceDbContext>(options => options.UseNpgsql(connectionString, npgsqlOptions =>
     {
         npgsqlOptions.EnableRetryOnFailure(
@@ -41,13 +42,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = builder.Environment.IsDevelopment()
-                ? new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"]!))
-                : new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("jwt_key")!)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("jwt_key")!)),
             ValidateIssuer = true,
-            ValidIssuer = "PersonalFinanceTracker",
+            ValidIssuer = Environment.GetEnvironmentVariable("jwt_issuer"),
             ValidateAudience = true,
-            ValidAudience = "PersonalFinanceTracker-Users",
+            ValidAudience = Environment.GetEnvironmentVariable("jwt_audience"),
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero
         };

@@ -32,8 +32,8 @@ public class JwtService : IJwtService
             }),
             Expires = GetTokenExpiration(),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
-            Issuer = "PersonalFinanceTracker",
-            Audience = "PersonalFinanceTracker-Users",
+            Issuer = Environment.GetEnvironmentVariable("jwt_issuer"),
+            Audience = Environment.GetEnvironmentVariable("jwt_audience"),
             IssuedAt = DateTime.UtcNow
         };
 
@@ -45,7 +45,7 @@ public class JwtService : IJwtService
 
     public DateTime GetTokenExpiration()
     {
-        var expirationHours = 24;
+        var expirationHours = Convert.ToInt32(Environment.GetEnvironmentVariable("jwt_expiration"));
         return DateTime.UtcNow.AddHours(expirationHours);
     }
 }
