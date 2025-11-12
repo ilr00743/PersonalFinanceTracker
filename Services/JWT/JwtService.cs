@@ -21,7 +21,7 @@ public class JwtService : IJwtService
 
         var tokenHandler = new JwtSecurityTokenHandler();
         
-        var key = Encoding.ASCII.GetBytes(_configuration["JwtSettings:SecretKey"]);
+        var key = Encoding.ASCII.GetBytes(Environment.GetEnvironmentVariable("jwt_key")!);
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -32,8 +32,8 @@ public class JwtService : IJwtService
             }),
             Expires = GetTokenExpiration(),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
-            Issuer = _configuration["JwtSettings:Issuer"],
-            Audience = _configuration.GetSection("JwtSettings:Audience").Value,
+            Issuer = "PersonalFinanceTracker",
+            Audience = "PersonalFinanceTracker-Users",
             IssuedAt = DateTime.UtcNow
         };
 
