@@ -12,8 +12,8 @@ using PersonalFinanceTracker.Data;
 namespace PersonalFinanceTracker.Migrations
 {
     [DbContext(typeof(FinanceDbContext))]
-    [Migration("20251111222306_InitialPostgreSQL")]
-    partial class InitialPostgreSQL
+    [Migration("20251112214853_SetLegacyTimestampBehaviour")]
+    partial class SetLegacyTimestampBehaviour
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -37,7 +37,7 @@ namespace PersonalFinanceTracker.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("Limit")
                         .HasColumnType("numeric");
@@ -105,7 +105,7 @@ namespace PersonalFinanceTracker.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -133,7 +133,7 @@ namespace PersonalFinanceTracker.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Email")
                         .IsRequired()
