@@ -1,4 +1,6 @@
 @PersonalFinanceTracker_HostAddress = http://localhost:5198
+@Production_HostAddress = https://personalfinancetracker-2nhw.onrender.com
+@Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxIiwiZW1haWwiOiJ0ZXN0QGV4YW1wbGUuY29tIiwibmJmIjoxNzYyOTczMzQxLCJleHAiOjE3NjMwNTk3NDEsImlhdCI6MTc2Mjk3MzM0MSwiaXNzIjoiUGVyc29uYWxGaW5hbmNlVHJhY2tlciIsImF1ZCI6IlBlcnNvbmFsRmluYW5jZVRyYWNrZXItVXNlcnMifQ.1-Xped7o99x2YHRGkFOpLbpDWb4x_cdIKkrITt_DdE0
 
 GET {{PersonalFinanceTracker_HostAddress}}/weatherforecast/
 Accept: application/json
@@ -6,3 +8,80 @@ Accept: application/json
 ###
 
 DELETE {{PersonalFinanceTracker_HostAddress}}/api/categories/6/
+
+###
+
+POST {{Production_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "Test1234!"
+}
+
+###
+
+POST {{Production_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "Test1234!"
+}
+
+
+###
+
+POST {{Production_HostAddress}}/api/categories
+Content-Type: application/json
+Authorization: Bearer {{Token}}
+
+{
+  "name": "Salary",
+  "description": "Monthly income",
+  "type": 1
+}
+
+###
+
+GET {{Production_HostAddress}}/api/categories
+Accept: application/json
+Authorization: Bearer {{Token}}
+
+###
+
+GET {{Production_HostAddress}}/api/categories/1
+Accept: application/json
+Authorization: Bearer {{Token}}
+
+###
+
+POST {{Production_HostAddress}}/api/transactions
+Content-Type: application/json
+Authorization: Bearer {{Token}}
+
+{
+  "amount": 1000,
+  "description": "November salary",
+  "date": "2025-11-12T00:00:00Z",
+  "categoryId": 1
+}
+
+###
+
+POST {{Production_HostAddress}}/api/budgets
+Content-Type: application/json
+Authorization: Bearer {{Token}}
+
+{
+  "categoryId": 1,
+  "limit": 5000,
+  "month": 11,
+  "year": 2025
+}
+
+###
+
+GET {{Production_HostAddress}}/api/analytics/summary
+Content-Type: application/json
+Authorization: Bearer {{Token}}

@@ -23,7 +23,7 @@ if (builder.Environment.IsDevelopment())
 }
 else
 {
-    
+    AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
     builder.Services.AddDbContext<FinanceDbContext>(options => options.UseNpgsql(connectionString, npgsqlOptions =>
     {
         npgsqlOptions.EnableRetryOnFailure(
